@@ -19,7 +19,7 @@ namespace File_Transferring
         Form1 form;
         Thread readFile;
         string fileName;
-        const int chunk = 60 * 1024;
+        const int chunk = 1400;
         long counter = 0;
 
         public void OpenFile()
