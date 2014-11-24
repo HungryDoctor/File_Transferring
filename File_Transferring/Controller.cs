@@ -21,6 +21,7 @@ namespace File_Transferring
         string fileName;
         const int chunk = 1400;
         long counter = 0;
+        FileStream fileStream;
 
         public void OpenFile()
         {
@@ -40,9 +41,15 @@ namespace File_Transferring
             readFile = new Thread(ReadAndProcessLargeFile);
         }
 
+        void Prepare()
+        {
+            fileStream = new FileStream(@"E:\1.iso", FileMode.Create);
+        }
+
 
         void ReadAndProcessLargeFile()
         {
+            Prepare();
             FileStream fileStram = new FileStream(fileName, FileMode.Open, FileAccess.Read);
             using (fileStram)
             {
@@ -60,7 +67,7 @@ namespace File_Transferring
 
         void ProcessChunk(byte[] buffer, int bytesRead)
         {
-            // Do the processing here
+            fileStream.Write(buffer, 0, chunk);
             counter++;
         }
 

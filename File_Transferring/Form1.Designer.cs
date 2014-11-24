@@ -133,9 +133,9 @@
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(17, 53);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(61, 13);
+            this.label6.Size = new System.Drawing.Size(51, 13);
             this.label6.TabIndex = 7;
-            this.label6.Text = "IP of server";
+            this.label6.Text = "Server IP";
             // 
             // label3
             // 
