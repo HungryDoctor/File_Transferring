@@ -15,14 +15,16 @@ namespace File_Transferring
         public Form1()
         {
             InitializeComponent();
-            controller = new Controller(this);
+            client = new Client(this);
+            server = new Server(this);
         }
 
-        Controller controller;
+        Client client;
+        Server server;
 
         private void button1_Click(object sender, EventArgs e)
         {
-            controller.OpenFile();
+            client.OpenFile();
         }
 
         private void button2_Click(object sender, EventArgs e)
