@@ -32,13 +32,15 @@ namespace File_Transferring
         {
             if (clientStatus == false)
             {
+                clientStatus = true;
                 Connect();
             }
             else
             {
+                clientStatus = false;
                 Disconnect();
             }
-            clientStatus = clientStatus ^ true;
+
         }
 
         public void OpenFile()
@@ -50,7 +52,6 @@ namespace File_Transferring
                     filePath = dialog.FileName;
                     fileName = dialog.SafeFileName;
                     ResetThread();
-                    form.panel2.Enabled = false;
                     readFile.Start();
                 }
             }
@@ -84,9 +85,6 @@ namespace File_Transferring
             ProcessChunk(finished, 0);
 
             MessageBox.Show("Clent: " + counter.ToString());
-
-            Action enable = () => { form.panel2.Enabled = true; };
-            form.panel2.Invoke(enable, null);
         }
 
         void ProcessChunk(byte[] buffer, int bytesRead)
@@ -164,10 +162,8 @@ namespace File_Transferring
             {
                 senderSocket.Shutdown(SocketShutdown.Both);
                 senderSocket.Close();
-
                 senderSocket.Dispose();
 
-                readFile = null;
                 senderSocket = null;
 
                 form.textBox1.Enabled = true;
