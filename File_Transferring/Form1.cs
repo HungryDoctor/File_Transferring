@@ -29,17 +29,22 @@ namespace File_Transferring
 
         private void button2_Click(object sender, EventArgs e)
         {
-
+            client.MainClient();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-
+            server.MainServer();
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Environment.Exit(0);
         }
     }
 }

@@ -52,6 +52,7 @@
             // 
             // button1
             // 
+            this.button1.Enabled = false;
             this.button1.Location = new System.Drawing.Point(3, 100);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(94, 23);
@@ -171,6 +172,7 @@
             // 
             // button4
             // 
+            this.button4.Enabled = false;
             this.button4.Location = new System.Drawing.Point(3, 100);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(94, 23);
@@ -233,6 +235,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);

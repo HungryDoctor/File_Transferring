@@ -24,7 +24,22 @@ namespace File_Transferring
         const int chunk = 1400;
         string filePath;
         string fileName;
+        bool clientStatus = false;
 
+        long counter = 0;
+
+        public void MainClient()
+        {
+            if (clientStatus == false)
+            {
+                Connect();
+            }
+            else
+            {
+                Disconnect();
+            }
+            clientStatus = clientStatus ^ true;
+        }
 
         public void OpenFile()
         {
@@ -47,10 +62,9 @@ namespace File_Transferring
             readFile.IsBackground = true;
         }
 
-
         void ReadAndProcessLargeFile()
         {
-            byte[] started = Encoding.Unicode.GetBytes("<!Transfer_started!>");
+            byte[] started = Encoding.Unicode.GetBytes("<!Transfer_Started!>");
             ProcessChunk(started, 0);
 
             FileStream fileStram = new FileStream(filePath, FileMode.Open, FileAccess.Read);
@@ -66,8 +80,10 @@ namespace File_Transferring
                 }
             }
 
-            byte[] finished = Encoding.Unicode.GetBytes("<!Transfer_finished!>");
+            byte[] finished = Encoding.Unicode.GetBytes("<!Transfer_Finished!>");
             ProcessChunk(finished, 0);
+
+            MessageBox.Show("Clent: " + counter.ToString());
 
             Action enable = () => { form.panel2.Enabled = true; };
             form.panel2.Invoke(enable, null);
@@ -78,15 +94,13 @@ namespace File_Transferring
             try
             {
                 senderSocket.Send(buffer);
-                Receive();
+                counter++;
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
             }
         }
-
-
 
         void Connect()
         {
@@ -125,42 +139,42 @@ namespace File_Transferring
                 senderSocket.Connect(ipEndPoint);
 
 
-                //Change status to connected
+                form.textBox1.Enabled = false;
+                form.textBox2.Enabled = false;
+                form.button1.Enabled = true;
+                form.button2.Text = "Disconnect";
+                form.label2.Text = "Connected";
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
+
+                form.textBox1.Enabled = true;
+                form.textBox2.Enabled = true;
+                form.button1.Enabled = false;
+                form.button2.Text = "Connect";
+                form.label2.Text = "Not connected";
             }
         }
 
-        void Receive()
-        {
-            try
-            {
-                byte[] buffer = new byte[chunk];
-
-                int bytesRec = senderSocket.Receive(buffer);
-
-                while (senderSocket.Available > 0)
-                {
-                    bytesRec = senderSocket.Receive(buffer);
-                    //Process here
-                }
-
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
 
         void Disconnect()
         {
             try
             {
                 senderSocket.Shutdown(SocketShutdown.Both);
-
                 senderSocket.Close();
+
+                senderSocket.Dispose();
+
+                readFile = null;
+                senderSocket = null;
+
+                form.textBox1.Enabled = true;
+                form.textBox2.Enabled = true;
+                form.button1.Enabled = false;
+                form.button2.Text = "Connect";
+                form.label2.Text = "Not connected";
             }
             catch (Exception e)
             {
