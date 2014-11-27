@@ -237,31 +237,27 @@ namespace File_Transferring
                     // If message contains "<!Transfer_Finished!>", finish receiving
                     if (content.IndexOf("<!Transfer_Finished!>") > -1)
                     {
-                        // Continues to asynchronously receive data
-                        byte[] bufferNew = new byte[chunk];
-                        obj[0] = bufferNew;
-                        obj[1] = handler;
-                        handler.BeginReceive(bufferNew, 0, buffer.Length,
-                            SocketFlags.None,
-                            new AsyncCallback(ReceiveCallback), obj);
-
-
-                        MessageBox.Show("Server: " + counter.ToString());
+                        MessageBox.Show("Server: " + counter.ToString()+" Finished");
 
                         Send();
                     }
-                    else
-                    {
-                        // Continues to asynchronously receive data
-                        byte[] bufferNew = new byte[chunk];
-                        obj[0] = bufferNew;
-                        obj[1] = handler;
-                        handler.BeginReceive(bufferNew, 0, buffer.Length,
-                            SocketFlags.None,
-                            new AsyncCallback(ReceiveCallback), obj);
 
-                        //Do smth with bufferNew
+                    if (content.IndexOf("<!Transfer_Started!>") > -1)
+                    {
+                        MessageBox.Show("Server: " + counter.ToString() + " Started");
+
+                        Send();
                     }
+
+                    // Continues to asynchronously receive data
+                    byte[] bufferNew = new byte[chunk];
+                    obj[0] = bufferNew;
+                    obj[1] = handler;
+                    handler.BeginReceive(bufferNew, 0, buffer.Length,
+                        SocketFlags.None,
+                        new AsyncCallback(ReceiveCallback), obj);
+
+                    //Do smth with bufferNew
                 }
             }
             catch (Exception e)
