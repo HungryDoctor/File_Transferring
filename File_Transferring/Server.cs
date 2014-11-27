@@ -91,6 +91,10 @@ namespace File_Transferring
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
+
+                serverStatus = false;
+
+                StopServer();
             }
         }
 

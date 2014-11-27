@@ -124,6 +124,8 @@ namespace File_Transferring
                 // Creates a network endpoint 
                 IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 4510);
 
+                senderSocket = null;
+
                 // Create one Socket object to setup Tcp connection 
                 senderSocket = new Socket(
                     ipAddr.AddressFamily,// Specifies the addressing scheme 
@@ -147,11 +149,9 @@ namespace File_Transferring
             {
                 MessageBox.Show(e.ToString());
 
-                form.textBox1.Enabled = true;
-                form.textBox2.Enabled = true;
-                form.button1.Enabled = false;
-                form.button2.Text = "Connect";
-                form.label2.Text = "Not connected";
+                clientStatus = false;
+
+                Disconnect();
             }
         }
 
@@ -160,7 +160,10 @@ namespace File_Transferring
         {
             try
             {
-                senderSocket.Shutdown(SocketShutdown.Both);
+                if (senderSocket.Connected == true)
+                {
+                    senderSocket.Shutdown(SocketShutdown.Both);
+                }
                 senderSocket.Close();
                 senderSocket.Dispose();
 
