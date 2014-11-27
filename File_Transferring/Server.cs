@@ -112,7 +112,6 @@ namespace File_Transferring
                     AsyncCallback aCallback = new AsyncCallback(AcceptCallback);
                     socketListener.BeginAccept(aCallback, socketListener);
                 }
-                //Change status to Listening
             }
             catch (Exception e)
             {
@@ -198,6 +197,8 @@ namespace File_Transferring
                     if (content.IndexOf("<!Transfer_Finished!>") > -1)
                     {
                         MessageBox.Show("Server: " + counter.ToString());
+
+                        Send();
                     }
                     else
                     {
@@ -219,6 +220,37 @@ namespace File_Transferring
             }
         }
 
+        void Send()
+        {
+            try
+            {
+                // byteData - data to send 
+                byte[] byteData = new byte[chunk];
+
+
+                // Sends data asynchronously to a connected Socket 
+                handler.BeginSend(byteData, 0, byteData.Length, 0,
+                    new AsyncCallback(SendCallback), handler);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+        public void SendCallback(IAsyncResult ar)
+        {
+            try
+            {
+                // A Socket which has sent the data to remote host 
+                Socket handler = (Socket)ar.AsyncState;
+                int bytesSend = handler.EndSend(ar);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
 
         private void StopServer()
         {

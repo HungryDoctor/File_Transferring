@@ -16,15 +16,19 @@ namespace File_Transferring
         public Client(Form1 form)
         {
             this.form = form;
+
+            ResetThread();
         }
 
         Form1 form;
         Thread readFile;
+        Thread listen;
         Socket senderSocket;
         const int chunk = 1400;
         string filePath;
         string fileName;
         bool clientStatus = false;
+        bool listening = false;
 
         long counter = 0;
 
@@ -51,7 +55,6 @@ namespace File_Transferring
                 {
                     filePath = dialog.FileName;
                     fileName = dialog.SafeFileName;
-                    ResetThread();
                     readFile.Start();
                 }
             }
@@ -61,6 +64,9 @@ namespace File_Transferring
         {
             readFile = new Thread(ReadAndProcessLargeFile);
             readFile.IsBackground = true;
+
+            listen = new Thread(Listen);
+            listen.IsBackground = true;
         }
 
         void ReadAndProcessLargeFile()
@@ -144,6 +150,9 @@ namespace File_Transferring
                 form.button1.Enabled = true;
                 form.button2.Text = "Disconnect";
                 form.label2.Text = "Connected";
+
+                listening = true;
+                listen.Start();
             }
             catch (Exception e)
             {
@@ -155,11 +164,55 @@ namespace File_Transferring
             }
         }
 
+        void Listen()
+        {
+            while (listening == true)
+            {
+                ReceiveDataFromServer();
+            }
+        }
+
+        void ReceiveDataFromServer()
+        {
+            try
+            {
+                byte[] byteData = new byte[chunk];
+                // Receives data from a bound Socket. 
+                int bytesRec = senderSocket.Receive(byteData);
+
+                // Converts byte array to string 
+                String theMessageToReceive = Encoding.Unicode.GetString(byteData, 0, bytesRec);
+
+                // Continues to read the data till data isn't available 
+                while (senderSocket.Available > 0)
+                {
+                    bytesRec = senderSocket.Receive(byteData);
+                    theMessageToReceive += Encoding.Unicode.GetString(byteData, 0, bytesRec);
+                }
+
+                MessageBox.Show("Recived message from server");
+
+                //Process byteData here
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
 
         void Disconnect()
         {
             try
             {
+                listening = false;
+                try
+                {
+                    listen.Abort();
+                }
+                catch
+                { }
+
+
                 if (senderSocket.Connected == true)
                 {
                     senderSocket.Shutdown(SocketShutdown.Both);
