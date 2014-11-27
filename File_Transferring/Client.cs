@@ -35,7 +35,23 @@ namespace File_Transferring
         {
             if (clientStatus == false)
             {
-                Connect();
+                IPAddress ipAddr;
+                int port = -1;
+                bool goodIp = IPAddress.TryParse(window.textBox1.Text, out ipAddr);
+                bool goodPort = int.TryParse(window.textBox2.Text, out port);
+                if (port < 1 || port > 65535)
+                {
+                    goodPort = false;
+                }
+
+                if (goodIp == true && goodPort == true)
+                {
+                    Connect();
+                }
+                else
+                {
+                    MessageBox.Show("Entered strings aren't IP or Port");
+                }
             }
             else
             {

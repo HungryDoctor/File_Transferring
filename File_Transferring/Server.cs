@@ -27,7 +27,6 @@ namespace File_Transferring
         AutoResetEvent resetEvent = new AutoResetEvent(false);
         const int chunk = 1400;
         bool serverStatus = false;
-        bool listening = false;
 
         long counter = 0;
 
@@ -35,7 +34,21 @@ namespace File_Transferring
         {
             if (serverStatus == false)
             {
-                StartServer();
+                int port = -1;
+                bool goodPort = int.TryParse(window.textBox2.Text, out port);
+                if (port < 1 || port > 65535)
+                {
+                    goodPort = false;
+                }
+
+                if (goodPort == true)
+                {
+                    StartServer();
+                }
+                else
+                {
+                    MessageBox.Show("Entered string isn't Port");
+                }
             }
             else
             {
@@ -88,7 +101,6 @@ namespace File_Transferring
                 window.button3.Text = "Stop";
                 window.label5.Text = "Started";
 
-                listening = true;
                 serverStatus = true;
                 listen = new Thread(ReciveData);
                 listen.IsBackground = true;
@@ -106,7 +118,6 @@ namespace File_Transferring
         {
             try
             {
-                listening = false;
                 serverStatus = false;
 
                 if (listen != null && listen.IsAlive == true)
@@ -237,7 +248,7 @@ namespace File_Transferring
                     // If message contains "<!Transfer_Finished!>", finish receiving
                     if (content.IndexOf("<!Transfer_Finished!>") > -1)
                     {
-                        MessageBox.Show("Server: " + counter.ToString()+" Finished");
+                        MessageBox.Show("Server: " + counter.ToString() + " Finished");
 
                         Send();
                     }
