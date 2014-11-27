@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "File_Transferring", "File_Transferring\File_Transferring.csproj", "{62F72A61-9324-464E-9EB4-70B7F2FD7DB4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "File_Transferring", "File_Transferring\File_Transferring.csproj", "{095E3CC3-797A-48A1-A756-DD3F37EE9432}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{62F72A61-9324-464E-9EB4-70B7F2FD7DB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{62F72A61-9324-464E-9EB4-70B7F2FD7DB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{62F72A61-9324-464E-9EB4-70B7F2FD7DB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{62F72A61-9324-464E-9EB4-70B7F2FD7DB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{095E3CC3-797A-48A1-A756-DD3F37EE9432}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{095E3CC3-797A-48A1-A756-DD3F37EE9432}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{095E3CC3-797A-48A1-A756-DD3F37EE9432}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{095E3CC3-797A-48A1-A756-DD3F37EE9432}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

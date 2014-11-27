@@ -12,18 +12,22 @@ namespace File_Transferring
 {
     class Server
     {
-        public Server(Form1 form)
+
+        public Server(MainWindow window)
         {
-            this.form = form;
+            this.window = window;
         }
 
-        Form1 form;
+        MainWindow window;
         SocketPermission permission;
         Socket socketListener;
-        IPEndPoint ipEndPoint;
         Socket handler;
+        IPEndPoint ipEndPoint;
+        Thread listen;
+        AutoResetEvent resetEvent = new AutoResetEvent(false);
         const int chunk = 1400;
         bool serverStatus = false;
+        bool listening = false;
 
         long counter = 0;
 
@@ -31,12 +35,10 @@ namespace File_Transferring
         {
             if (serverStatus == false)
             {
-                serverStatus = true;
                 StartServer();
             }
             else
             {
-                serverStatus = false;
                 StopServer();
             }
         }
@@ -80,25 +82,63 @@ namespace File_Transferring
                 // Associates a Socket with a local endpoint 
                 socketListener.Bind(ipEndPoint);
 
-                Listen();
-
                 //Change status to Started
-                form.textBox3.Enabled = false;
-                form.button4.Enabled = true;
-                form.button3.Text = "Stop";
-                form.label5.Text = "Started";
+                window.textBox3.Enabled = false;
+                window.button4.Enabled = true;
+                window.button3.Text = "Stop";
+                window.label5.Text = "Started";
+
+                listening = true;
+                serverStatus = true;
+                listen = new Thread(ReciveData);
+                listen.IsBackground = true;
+                listen.Start();
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
 
-                serverStatus = false;
-
                 StopServer();
             }
         }
 
-        private void Listen()
+        void StopServer()
+        {
+            try
+            {
+                listening = false;
+                serverStatus = false;
+
+                if (listen != null && listen.IsAlive == true)
+                {
+                    listen.Abort();
+                }
+
+                if (socketListener.Connected == true)
+                {
+                    socketListener.Shutdown(SocketShutdown.Both);
+                }
+                socketListener.Close();
+                socketListener.Dispose();
+
+                permission = null;
+                socketListener = null;
+                ipEndPoint = null;
+                handler = null;
+
+                //Change status to Stopped
+                window.textBox3.Enabled = true;
+                window.button4.Enabled = false;
+                window.button3.Text = "Start";
+                window.label5.Text = "Not started";
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+        void ReciveData()
         {
             try
             {
@@ -162,6 +202,7 @@ namespace File_Transferring
                 {
                     MessageBox.Show(e.ToString());
                 }
+
             }
         }
 
@@ -196,6 +237,15 @@ namespace File_Transferring
                     // If message contains "<!Transfer_Finished!>", finish receiving
                     if (content.IndexOf("<!Transfer_Finished!>") > -1)
                     {
+                        // Continues to asynchronously receive data
+                        byte[] bufferNew = new byte[chunk];
+                        obj[0] = bufferNew;
+                        obj[1] = handler;
+                        handler.BeginReceive(bufferNew, 0, buffer.Length,
+                            SocketFlags.None,
+                            new AsyncCallback(ReceiveCallback), obj);
+
+
                         MessageBox.Show("Server: " + counter.ToString());
 
                         Send();
@@ -238,7 +288,7 @@ namespace File_Transferring
             }
         }
 
-        public void SendCallback(IAsyncResult ar)
+        void SendCallback(IAsyncResult ar)
         {
             try
             {
@@ -252,32 +302,6 @@ namespace File_Transferring
             }
         }
 
-        private void StopServer()
-        {
-            try
-            {
-                if (socketListener.Connected == true)
-                {
-                    socketListener.Shutdown(SocketShutdown.Both);
-                }
-                socketListener.Close();
-                socketListener.Dispose();
 
-                permission = null;
-                socketListener = null;
-                ipEndPoint = null;
-                handler = null;
-
-                //Change status to Stopped
-                form.textBox3.Enabled = true;
-                form.button4.Enabled = false;
-                form.button3.Text = "Start";
-                form.label5.Text = "Not started";
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
     }
 }

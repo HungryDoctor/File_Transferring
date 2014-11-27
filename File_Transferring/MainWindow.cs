@@ -10,11 +10,12 @@ using System.Windows.Forms;
 
 namespace File_Transferring
 {
-    public partial class Form1 : Form
+    public partial class MainWindow : Form
     {
-        public Form1()
+        public MainWindow()
         {
             InitializeComponent();
+
             client = new Client(this);
             server = new Server(this);
         }
@@ -24,12 +25,12 @@ namespace File_Transferring
 
         private void button1_Click(object sender, EventArgs e)
         {
-            client.OpenFile();
+            client.MainClient();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            client.MainClient();
+            client.OpenFile();
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -40,11 +41,6 @@ namespace File_Transferring
         private void button4_Click(object sender, EventArgs e)
         {
 
-        }
-
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            Environment.Exit(0);
         }
     }
 }

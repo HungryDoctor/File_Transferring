@@ -13,14 +13,13 @@ namespace File_Transferring
 {
     class Client
     {
-        public Client(Form1 form)
-        {
-            this.form = form;
 
-            ResetThread();
+        public Client(MainWindow window)
+        {
+            this.window = window;
         }
 
-        Form1 form;
+        MainWindow window;
         Thread readFile;
         Thread listen;
         Socket senderSocket;
@@ -36,73 +35,11 @@ namespace File_Transferring
         {
             if (clientStatus == false)
             {
-                clientStatus = true;
                 Connect();
             }
             else
             {
-                clientStatus = false;
                 Disconnect();
-            }
-
-        }
-
-        public void OpenFile()
-        {
-            using (OpenFileDialog dialog = new OpenFileDialog())
-            {
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    filePath = dialog.FileName;
-                    fileName = dialog.SafeFileName;
-                    readFile.Start();
-                }
-            }
-        }
-
-        void ResetThread()
-        {
-            readFile = new Thread(ReadAndProcessLargeFile);
-            readFile.IsBackground = true;
-
-            listen = new Thread(Listen);
-            listen.IsBackground = true;
-        }
-
-        void ReadAndProcessLargeFile()
-        {
-            byte[] started = Encoding.Unicode.GetBytes("<!Transfer_Started!>");
-            ProcessChunk(started, 0);
-
-            FileStream fileStram = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            using (fileStram)
-            {
-                byte[] buffer = new byte[chunk];
-                fileStram.Seek(0, SeekOrigin.Begin);
-                int bytesRead = fileStram.Read(buffer, 0, chunk);
-                while (bytesRead > 0)
-                {
-                    ProcessChunk(buffer, bytesRead);
-                    bytesRead = fileStram.Read(buffer, 0, chunk);
-                }
-            }
-
-            byte[] finished = Encoding.Unicode.GetBytes("<!Transfer_Finished!>");
-            ProcessChunk(finished, 0);
-
-            MessageBox.Show("Clent: " + counter.ToString());
-        }
-
-        void ProcessChunk(byte[] buffer, int bytesRead)
-        {
-            try
-            {
-                senderSocket.Send(buffer);
-                counter++;
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
             }
         }
 
@@ -145,22 +82,59 @@ namespace File_Transferring
                 senderSocket.Connect(ipEndPoint);
 
 
-                form.textBox1.Enabled = false;
-                form.textBox2.Enabled = false;
-                form.button1.Enabled = true;
-                form.button2.Text = "Disconnect";
-                form.label2.Text = "Connected";
+                window.textBox1.Enabled = false;
+                window.textBox2.Enabled = false;
+                window.button2.Enabled = true;
+                window.button1.Text = "Disconnect";
+                window.label2.Text = "Connected";
 
+                clientStatus = true;
                 listening = true;
+                listen = new Thread(Listen);
+                listen.IsBackground = true;
                 listen.Start();
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
 
+                Disconnect();
+            }
+        }
+
+        void Disconnect()
+        {
+            try
+            {
+                listening = false;
                 clientStatus = false;
 
-                Disconnect();
+                if (readFile != null && readFile.IsAlive == true)
+                {
+                    readFile.Abort();
+                }
+
+                if (listen != null && listen.IsAlive == true)
+                {
+                    listen.Abort();
+                }
+
+                if (senderSocket.Connected == true)
+                {
+                    senderSocket.Shutdown(SocketShutdown.Both);
+                }
+                senderSocket.Close();
+                senderSocket.Dispose();
+
+                window.textBox1.Enabled = true;
+                window.textBox2.Enabled = true;
+                window.button2.Enabled = false;
+                window.button1.Text = "Connect";
+                window.label2.Text = "Not connected";
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
             }
         }
 
@@ -168,11 +142,11 @@ namespace File_Transferring
         {
             while (listening == true)
             {
-                ReceiveDataFromServer();
+                ReceiveData();
             }
         }
 
-        void ReceiveDataFromServer()
+        void ReceiveData()
         {
             try
             {
@@ -183,14 +157,14 @@ namespace File_Transferring
                 // Converts byte array to string 
                 String theMessageToReceive = Encoding.Unicode.GetString(byteData, 0, bytesRec);
 
-                // Continues to read the data till data isn't available 
-                while (senderSocket.Available > 0)
-                {
-                    bytesRec = senderSocket.Receive(byteData);
-                    theMessageToReceive += Encoding.Unicode.GetString(byteData, 0, bytesRec);
-                }
+                //// Continues to read the data till data isn't available 
+                //while (senderSocket.Available > 0)
+                //{
+                //    bytesRec = senderSocket.Receive(byteData);
+                //    theMessageToReceive += Encoding.Unicode.GetString(byteData, 0, bytesRec);
+                //}
 
-                MessageBox.Show("Recived message from server");
+                MessageBox.Show("Client: Recived from server");
 
                 //Process byteData here
             }
@@ -200,38 +174,69 @@ namespace File_Transferring
             }
         }
 
-        void Disconnect()
+        void ReadAndProcessLargeFile()
         {
             try
             {
-                listening = false;
-                try
+                byte[] started = Encoding.Unicode.GetBytes("<!Transfer_Started!>");
+                ProcessChunk(started, 0);
+
+                FileStream fileStram = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                using (fileStram)
                 {
-                    listen.Abort();
+                    byte[] buffer = new byte[chunk];
+                    fileStram.Seek(0, SeekOrigin.Begin);
+                    int bytesRead = fileStram.Read(buffer, 0, chunk);
+                    while (bytesRead > 0)
+                    {
+                        ProcessChunk(buffer, bytesRead);
+                        bytesRead = fileStram.Read(buffer, 0, chunk);
+                    }
                 }
-                catch
-                { }
 
+                byte[] finished = Encoding.Unicode.GetBytes("<!Transfer_Finished!>");
+                ProcessChunk(finished, 0);
 
-                if (senderSocket.Connected == true)
-                {
-                    senderSocket.Shutdown(SocketShutdown.Both);
-                }
-                senderSocket.Close();
-                senderSocket.Dispose();
+                MessageBox.Show("Clent: " + counter.ToString());
 
-                senderSocket = null;
-
-                form.textBox1.Enabled = true;
-                form.textBox2.Enabled = true;
-                form.button1.Enabled = false;
-                form.button2.Text = "Connect";
-                form.label2.Text = "Not connected";
+                window.button2.Invoke(new Action(() => window.button2.Enabled = true), null);
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
             }
         }
+
+        void ProcessChunk(byte[] buffer, int bytesRead)
+        {
+            try
+            {
+                senderSocket.Send(buffer);
+                counter++;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+        public void OpenFile()
+        {
+            using (OpenFileDialog dialog = new OpenFileDialog())
+            {
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    filePath = dialog.FileName;
+                    fileName = dialog.SafeFileName;
+                    window.button2.Enabled = false;
+                    readFile = new Thread(ReadAndProcessLargeFile);
+                    readFile.IsBackground = true;
+                    readFile.Start();
+                }
+            }
+        }
+
+
+
     }
 }
