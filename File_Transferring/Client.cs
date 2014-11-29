@@ -192,11 +192,14 @@ namespace File_Transferring
             try
             {
                 stopped = false;
+
+                byte[] started = Encoding.Unicode.GetBytes("<!Transfer_Started!>");
+                ProcessChunk(started, 0);
+
                 byte[] fileNameByte = Encoding.Unicode.GetBytes(this.fileName + "<!File_Name!>");
                 ProcessChunk(fileNameByte, 0);
 
-                //byte[] started = Encoding.Unicode.GetBytes("<!Transfer_Started!>");
-                //ProcessChunk(started, 0);
+
 
                
                 using ( FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))

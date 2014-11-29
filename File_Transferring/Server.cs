@@ -249,9 +249,9 @@ namespace File_Transferring
                     {
                         content += Encoding.Unicode.GetString(buffer, 0, bytesRead);
 
-                        //if (content.IndexOf("<!Transfer_Started!>") > -1)
-                        //{
-                        //}
+                        if (content.IndexOf("<!Transfer_Started!>") > -1)
+                        {
+                        }
 
                         if (content.IndexOf("<!Transfer_Finished!>") > -1)
                         {
@@ -260,12 +260,12 @@ namespace File_Transferring
 
                         if (string.IsNullOrEmpty(fileName) == false)
                         {
-                            fileStream.Write(buffer, 0, buffer.le);
+                            fileStream.Write(buffer, 0,chunk);
                         }
 
                         if (content.IndexOf("<!File_Name!>") > -1)
                         {
-                            fileName = content.Replace("<!File_Name!>", "");
+                            fileName = content.Substring(0,content.IndexOf("<!File_Name!>"));
                             fileStream = new FileStream(dirPath + "\\" + fileName, FileMode.Create);
                         }
 
