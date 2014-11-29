@@ -40,7 +40,7 @@ namespace File_Transferring
 
         private void button4_Click(object sender, EventArgs e)
         {
-
+            server.SelectDirectory();
         }
     }
 }

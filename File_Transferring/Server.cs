@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -24,11 +25,12 @@ namespace File_Transferring
         Socket handler;
         IPEndPoint ipEndPoint;
         Thread listen;
-        AutoResetEvent resetEvent = new AutoResetEvent(false);
+        FileStream fileStream;
+
         const int chunk = 1400;
         bool serverStatus = false;
-
-        long counter = 0;
+        string dirPath;
+        string fileName;
 
         public void MainServer()
         {
@@ -199,7 +201,7 @@ namespace File_Transferring
                     handler.BeginReceive(
                         buffer,        // An array of type Byt for received data 
                         0,             // The zero-based position in the buffer  
-                        buffer.Length, // The number of bytes to receive 
+                        chunk, // The number of bytes to receive 
                         SocketFlags.None,// Specifies send and receive behaviors 
                         new AsyncCallback(ReceiveCallback),//An AsyncCallback delegate 
                         obj            // Specifies infomation for receive operation 
@@ -234,41 +236,47 @@ namespace File_Transferring
                 // Received message 
                 string content = string.Empty;
 
-
                 // The number of bytes received. 
                 int bytesRead = handler.EndReceive(ar);
 
                 if (bytesRead > 0)
                 {
-                    counter++;
-
-                    content += Encoding.Unicode.GetString(buffer, 0,
-                        bytesRead);
-
-                    // If message contains "<!Transfer_Finished!>", finish receiving
-                    if (content.IndexOf("<!Transfer_Finished!>") > -1)
+                    if (string.IsNullOrEmpty(dirPath) == true)//|| string.IsNullOrEmpty(fileName) == true)
                     {
-                        MessageBox.Show("Server: " + counter.ToString() + " Finished");
-
-                        Send();
+                        Send("<!Stop_Transfering!>");
                     }
-
-                    if (content.IndexOf("<!Transfer_Started!>") > -1)
+                    else
                     {
-                        MessageBox.Show("Server: " + counter.ToString() + " Started");
+                        content += Encoding.Unicode.GetString(buffer, 0, bytesRead);
 
-                        Send();
+                        //if (content.IndexOf("<!Transfer_Started!>") > -1)
+                        //{
+                        //}
+
+                        if (content.IndexOf("<!Transfer_Finished!>") > -1)
+                        {
+                            Finished();
+                        }
+
+                        if (string.IsNullOrEmpty(fileName) == false)
+                        {
+                            fileStream.Write(buffer, 0, buffer.le);
+                        }
+
+                        if (content.IndexOf("<!File_Name!>") > -1)
+                        {
+                            fileName = content.Replace("<!File_Name!>", "");
+                            fileStream = new FileStream(dirPath + "\\" + fileName, FileMode.Create);
+                        }
+
+
+                        // Continues to asynchronously receive data
+                        byte[] bufferNew = new byte[chunk];
+                        obj[0] = bufferNew;
+                        obj[1] = handler;
+                        handler.BeginReceive(bufferNew, 0, chunk, SocketFlags.None, new AsyncCallback(ReceiveCallback), obj);
+
                     }
-
-                    // Continues to asynchronously receive data
-                    byte[] bufferNew = new byte[chunk];
-                    obj[0] = bufferNew;
-                    obj[1] = handler;
-                    handler.BeginReceive(bufferNew, 0, buffer.Length,
-                        SocketFlags.None,
-                        new AsyncCallback(ReceiveCallback), obj);
-
-                    //Do smth with bufferNew
                 }
             }
             catch (Exception e)
@@ -277,12 +285,14 @@ namespace File_Transferring
             }
         }
 
-        void Send()
+        void Send(string message)
         {
             try
             {
                 // byteData - data to send 
                 byte[] byteData = new byte[chunk];
+
+                byteData = Encoding.Unicode.GetBytes(message);
 
 
                 // Sends data asynchronously to a connected Socket 
@@ -306,6 +316,23 @@ namespace File_Transferring
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
+            }
+        }
+
+        void Finished()
+        {
+            fileName = string.Empty;
+            fileStream.Dispose();
+        }
+
+        public void SelectDirectory()
+        {
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
+            {
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    dirPath = dialog.SelectedPath;
+                }
             }
         }
 

@@ -102,6 +102,7 @@
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(41, 20);
             this.textBox3.TabIndex = 4;
+            this.textBox3.Text = "55";
             // 
             // panel2
             // 
@@ -206,6 +207,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(89, 20);
             this.textBox1.TabIndex = 1;
+            this.textBox1.Text = "192.168.2.195";
             // 
             // label1
             // 
@@ -222,6 +224,7 @@
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(41, 20);
             this.textBox2.TabIndex = 3;
+            this.textBox2.Text = "55";
             // 
             // MainWindow
             // 

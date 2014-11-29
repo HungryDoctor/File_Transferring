@@ -23,13 +23,13 @@ namespace File_Transferring
         Thread readFile;
         Thread listen;
         Socket senderSocket;
+
         const int chunk = 1400;
         string filePath;
         string fileName;
         bool clientStatus = false;
         bool listening = false;
-
-        long counter = 0;
+        volatile bool stopped = false;
 
         public void MainClient()
         {
@@ -173,16 +173,13 @@ namespace File_Transferring
                 // Converts byte array to string 
                 String theMessageToReceive = Encoding.Unicode.GetString(byteData, 0, bytesRec);
 
+                stopped = true;
                 //// Continues to read the data till data isn't available 
                 //while (senderSocket.Available > 0)
                 //{
                 //    bytesRec = senderSocket.Receive(byteData);
                 //    theMessageToReceive += Encoding.Unicode.GetString(byteData, 0, bytesRec);
                 //}
-
-                MessageBox.Show("Client: Recived from server");
-
-                //Process byteData here
             }
             catch (Exception e)
             {
@@ -194,26 +191,28 @@ namespace File_Transferring
         {
             try
             {
-                byte[] started = Encoding.Unicode.GetBytes("<!Transfer_Started!>");
-                ProcessChunk(started, 0);
+                stopped = false;
+                byte[] fileNameByte = Encoding.Unicode.GetBytes(this.fileName + "<!File_Name!>");
+                ProcessChunk(fileNameByte, 0);
 
-                FileStream fileStram = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                using (fileStram)
+                //byte[] started = Encoding.Unicode.GetBytes("<!Transfer_Started!>");
+                //ProcessChunk(started, 0);
+
+               
+                using ( FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     byte[] buffer = new byte[chunk];
-                    fileStram.Seek(0, SeekOrigin.Begin);
-                    int bytesRead = fileStram.Read(buffer, 0, chunk);
-                    while (bytesRead > 0)
+                    fileStream.Seek(0, SeekOrigin.Begin);
+                    int bytesRead = fileStream.Read(buffer, 0, chunk);
+                    while (bytesRead > 0 && stopped == false)
                     {
                         ProcessChunk(buffer, bytesRead);
-                        bytesRead = fileStram.Read(buffer, 0, chunk);
+                        bytesRead = fileStream.Read(buffer, 0, chunk);
                     }
                 }
 
                 byte[] finished = Encoding.Unicode.GetBytes("<!Transfer_Finished!>");
                 ProcessChunk(finished, 0);
-
-                MessageBox.Show("Clent: " + counter.ToString());
 
                 window.button2.Invoke(new Action(() => window.button2.Enabled = true), null);
             }
@@ -228,7 +227,6 @@ namespace File_Transferring
             try
             {
                 senderSocket.Send(buffer);
-                counter++;
             }
             catch (Exception e)
             {
