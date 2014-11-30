@@ -231,8 +231,6 @@ namespace File_Transferring
                 tempArr = new byte[chunk + 4];             
 
                 intBytes = BitConverter.GetBytes(bytesRead);
-                if (BitConverter.IsLittleEndian)
-                    Array.Reverse(intBytes);
                 intBytes.CopyTo(tempArr, 0);
                 buffer.CopyTo(tempArr, 4);
 
