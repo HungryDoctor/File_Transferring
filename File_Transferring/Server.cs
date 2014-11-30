@@ -31,8 +31,8 @@ namespace File_Transferring
         bool serverStatus = false;
         string dirPath;
         string fileName;
-        byte[] tempArr;
         int toWrite;
+
         public void MainServer()
         {
             if (serverStatus == false)
@@ -64,12 +64,7 @@ namespace File_Transferring
             try
             {
                 // Creates one SocketPermission object for access restrictions
-                permission = new SocketPermission(
-                NetworkAccess.Accept,     // Allowed to accept connections 
-                TransportType.Tcp,        // Defines transport types 
-                "",                       // The IP addresses of local host 
-                SocketPermission.AllPorts // Specifies all ports 
-                );
+                permission = new SocketPermission(NetworkAccess.Accept, TransportType.Tcp, "", SocketPermission.AllPorts);
 
                 // Listening Socket object 
                 socketListener = null;
@@ -87,11 +82,7 @@ namespace File_Transferring
                 ipEndPoint = new IPEndPoint(ipAddr, 4510);
 
                 // Create one Socket object to listen the incoming connection 
-                socketListener = new Socket(
-                    ipAddr.AddressFamily,
-                    SocketType.Stream,
-                    ProtocolType.Tcp
-                    );
+                socketListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                 socketListener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
 
@@ -199,14 +190,7 @@ namespace File_Transferring
                     obj[1] = handler;
 
                     // Begins to asynchronously receive data 
-                    handler.BeginReceive(
-                        buffer,        // An array of type Byt for received data 
-                        0,             // The zero-based position in the buffer  
-                        chunk, // The number of bytes to receive 
-                        SocketFlags.None,// Specifies send and receive behaviors 
-                        new AsyncCallback(ReceiveCallback),//An AsyncCallback delegate 
-                        obj            // Specifies infomation for receive operation 
-                        );
+                    handler.BeginReceive(buffer, 0, chunk, SocketFlags.None, new AsyncCallback(ReceiveCallback), obj);
 
                     // Begins an asynchronous operation to accept an attempt 
                     AsyncCallback aCallback = new AsyncCallback(AcceptCallback);
@@ -261,18 +245,16 @@ namespace File_Transferring
 
                         if (string.IsNullOrEmpty(fileName) == false)
                         {
-                            tempArr = new byte[] { buffer[0], buffer[1], buffer[2], buffer[3]};
-                            toWrite = BitConverter.ToInt32(tempArr,0);
+                            toWrite = BitConverter.ToInt32(new byte[] { buffer[0], buffer[1], buffer[2], buffer[3] }, 0);
 
                             fileStream.Write(buffer, 4, toWrite);
                         }
 
                         if (content.IndexOf("<!File_Name!>") > -1)
                         {
-                            fileName = content.Substring(2,content.IndexOf("<!File_Name!>")-2);
+                            fileName = content.Substring(2, content.IndexOf("<!File_Name!>") - 2);
                             fileStream = new FileStream(dirPath + "\\" + fileName, FileMode.Create);
                         }
-
 
                         // Continues to asynchronously receive data
                         byte[] bufferNew = new byte[chunk];
@@ -298,10 +280,8 @@ namespace File_Transferring
 
                 byteData = Encoding.Unicode.GetBytes(message);
 
-
                 // Sends data asynchronously to a connected Socket 
-                handler.BeginSend(byteData, 0, chunk, 0,
-                    new AsyncCallback(SendCallback), handler);
+                handler.BeginSend(byteData, 0, chunk, 0, new AsyncCallback(SendCallback), handler);
             }
             catch (Exception e)
             {

@@ -237,7 +237,8 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.MaximizeBox = false;
             this.Name = "MainWindow";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.ShowIcon = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "File transferring";
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();

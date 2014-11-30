@@ -26,7 +26,6 @@ namespace File_Transferring
 
         const int chunk = 1396;
         byte[] tempArr;
-        byte[] intBytes;
         string filePath;
         string fileName;
         bool clientStatus = false;
@@ -66,12 +65,7 @@ namespace File_Transferring
             try
             {
                 // Create one SocketPermission for socket access restrictions 
-                SocketPermission permission = new SocketPermission(
-                    NetworkAccess.Connect,    // Connection permission 
-                    TransportType.Tcp,        // Defines transport types 
-                    "",                       // Gets the IP addresses 
-                    SocketPermission.AllPorts // All ports 
-                    );
+                SocketPermission permission = new SocketPermission(NetworkAccess.Connect, TransportType.Tcp, "", SocketPermission.AllPorts);
 
                 // Ensures the code to have permission to access a Socket 
                 permission.Demand();
@@ -88,11 +82,7 @@ namespace File_Transferring
                 senderSocket = null;
 
                 // Create one Socket object to setup Tcp connection 
-                senderSocket = new Socket(
-                    ipAddr.AddressFamily,// Specifies the addressing scheme 
-                    SocketType.Stream,   // The type of socket  
-                    ProtocolType.Tcp     // Specifies the protocols  
-                    );
+                senderSocket = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                 senderSocket.NoDelay = false;   // Using the Nagle algorithm 
 
@@ -200,12 +190,13 @@ namespace File_Transferring
 
                 byte[] fileNameByte = Encoding.Unicode.GetBytes(this.fileName + "<!File_Name!>");
                 ProcessChunk(fileNameByte, fileNameByte.Length);
-               
-                using ( FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+
+                using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     byte[] buffer = new byte[chunk];
                     fileStream.Seek(0, SeekOrigin.Begin);
                     int bytesRead = fileStream.Read(buffer, 0, chunk);
+
                     while (bytesRead > 0 && stopped == false)
                     {
                         ProcessChunk(buffer, bytesRead);
@@ -228,10 +219,8 @@ namespace File_Transferring
         {
             try
             {
-                tempArr = new byte[chunk + 4];             
-
-                intBytes = BitConverter.GetBytes(bytesRead);
-                intBytes.CopyTo(tempArr, 0);
+                tempArr = new byte[chunk + 4];
+                BitConverter.GetBytes(bytesRead).CopyTo(tempArr, 0);
                 buffer.CopyTo(tempArr, 4);
 
                 senderSocket.Send(tempArr);
