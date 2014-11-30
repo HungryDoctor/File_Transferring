@@ -24,7 +24,9 @@ namespace File_Transferring
         Thread listen;
         Socket senderSocket;
 
-        const int chunk = 1400;
+        const int chunk = 1396;
+        byte[] tempArr;
+        byte[] intBytes;
         string filePath;
         string fileName;
         bool clientStatus = false;
@@ -194,13 +196,10 @@ namespace File_Transferring
                 stopped = false;
 
                 byte[] started = Encoding.Unicode.GetBytes("<!Transfer_Started!>");
-                ProcessChunk(started, 0);
+                ProcessChunk(started, started.Length);
 
                 byte[] fileNameByte = Encoding.Unicode.GetBytes(this.fileName + "<!File_Name!>");
-                ProcessChunk(fileNameByte, 0);
-
-
-
+                ProcessChunk(fileNameByte, fileNameByte.Length);
                
                 using ( FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
@@ -215,7 +214,7 @@ namespace File_Transferring
                 }
 
                 byte[] finished = Encoding.Unicode.GetBytes("<!Transfer_Finished!>");
-                ProcessChunk(finished, 0);
+                ProcessChunk(finished, finished.Length);
 
                 window.button2.Invoke(new Action(() => window.button2.Enabled = true), null);
             }
@@ -229,7 +228,15 @@ namespace File_Transferring
         {
             try
             {
-                senderSocket.Send(buffer);
+                tempArr = new byte[chunk + 4];             
+
+                intBytes = BitConverter.GetBytes(bytesRead);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(intBytes);
+                intBytes.CopyTo(tempArr, 0);
+                buffer.CopyTo(tempArr, 4);
+
+                senderSocket.Send(tempArr);
             }
             catch (Exception e)
             {

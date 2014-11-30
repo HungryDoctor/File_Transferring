@@ -31,7 +31,8 @@ namespace File_Transferring
         bool serverStatus = false;
         string dirPath;
         string fileName;
-
+        byte[] tempArr;
+        int toWrite;
         public void MainServer()
         {
             if (serverStatus == false)
@@ -241,7 +242,7 @@ namespace File_Transferring
 
                 if (bytesRead > 0)
                 {
-                    if (string.IsNullOrEmpty(dirPath) == true)//|| string.IsNullOrEmpty(fileName) == true)
+                    if (string.IsNullOrEmpty(dirPath) == true)
                     {
                         Send("<!Stop_Transfering!>");
                     }
@@ -260,12 +261,15 @@ namespace File_Transferring
 
                         if (string.IsNullOrEmpty(fileName) == false)
                         {
-                            fileStream.Write(buffer, 0,chunk);
+                            tempArr = new byte[] { buffer[0], buffer[1], buffer[2], buffer[3]};
+                            toWrite = BitConverter.ToInt32(tempArr,0);
+
+                            fileStream.Write(buffer, 4, toWrite);
                         }
 
                         if (content.IndexOf("<!File_Name!>") > -1)
                         {
-                            fileName = content.Substring(0,content.IndexOf("<!File_Name!>"));
+                            fileName = content.Substring(2,content.IndexOf("<!File_Name!>")-2);
                             fileStream = new FileStream(dirPath + "\\" + fileName, FileMode.Create);
                         }
 
@@ -296,7 +300,7 @@ namespace File_Transferring
 
 
                 // Sends data asynchronously to a connected Socket 
-                handler.BeginSend(byteData, 0, byteData.Length, 0,
+                handler.BeginSend(byteData, 0, chunk, 0,
                     new AsyncCallback(SendCallback), handler);
             }
             catch (Exception e)
