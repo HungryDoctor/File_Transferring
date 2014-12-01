@@ -76,10 +76,11 @@ namespace File_Transferring
                 IPHostEntry ipHost = Dns.GetHostEntry("");
 
                 // Gets first IP address associated with a localhost 
-                IPAddress ipAddr = ipHost.AddressList[0];
+                IPAddress ipAddr;
+                IPAddress.TryParse(GetLocalIp(), out ipAddr);
 
                 // Creates a network endpoint 
-                ipEndPoint = new IPEndPoint(ipAddr, 4510);
+                ipEndPoint = new IPEndPoint(ipAddr, Convert.ToInt32(window.textBox3.Text));
 
                 // Create one Socket object to listen the incoming connection 
                 socketListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -320,6 +321,20 @@ namespace File_Transferring
             }
         }
 
-
+        string GetLocalIp()
+        {
+            IPHostEntry host;
+            string localIP = "";
+            host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    localIP = ip.ToString();
+                    break;
+                }
+            }
+            return localIP;
+        }
     }
 }

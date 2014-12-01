@@ -74,10 +74,11 @@ namespace File_Transferring
                 IPHostEntry ipHost = Dns.GetHostEntry("");
 
                 // Gets first IP address associated with a localhost 
-                IPAddress ipAddr = ipHost.AddressList[0];
+                IPAddress ipAddr;
+                IPAddress.TryParse(window.textBox1.Text, out ipAddr);
 
                 // Creates a network endpoint 
-                IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 4510);
+                IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, Convert.ToInt32(window.textBox2.Text));
 
                 senderSocket = null;
 
